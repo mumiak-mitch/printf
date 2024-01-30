@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <unistd.h>
 #include "main.h"
 
@@ -29,6 +30,7 @@ int _printf(const char *format, ...)
             format++;
             if (*format == '\0')
                 break;
+
             if (*format == 'c')
             {
                 char c = va_arg(my_list, int);
@@ -46,18 +48,57 @@ int _printf(const char *format, ...)
                 write(1, str, strlen);
                 specific_characters += strlen;
             }
+            else if (*format == 'd' || *format == 'i')
+            {
+                int num = va_arg(my_list, int);
+                char buffer[12];
+                int length = 0;
+
+                if (num < 0)
+                {
+                    write(1, "-", 1);
+                    specific_characters++;
+                    num = -num;
+                }
+
+                if (num == 0)
+                {
+                    write(1, "0", 1);
+                    specific_characters++;
+                }
+                else
+                {
+                    while (num != 0)
+                    {
+                        buffer[length++] = num % 10 + '0';
+                        num /= 10;
+                    }
+
+                    while (length > 0)
+                    {
+                        write(1, &buffer[--length], 1);
+                        specific_characters++;
+                    }
+                }
+            }
+            else if (*format == 'u')
+            {
+         
+            }
+            else if (*format == 'x' || *format == 'X')
+            {
+                
+            }
+            else if (*format == 'b')
+            {
+                unsigned int num = va_arg(my_list, unsigned int);
+                print_binary(num);
+                specific_characters += binary_length(num);
+            }
             else if (*format == '%')
             {
                 write(1, "%", 1);
                 specific_characters++;
-            }
-            else if (*format == 'd' || *format == 'i')
-            {
-                int num = va_arg(my_list, int);
-                char buffer[12]; 
-                int len = sprintf(buffer, "%d", num);
-                write(1, buffer, len);
-                specific_characters += len;
             }
         }
         format++;
@@ -66,5 +107,39 @@ int _printf(const char *format, ...)
     va_end(my_list);
 
     return specific_characters;
+}
+
+/**
+ * binary_length - Get the length of the binary representation of a number
+ * @num: Number to get the length of
+ *
+ * Return: Length of binary representation
+ */
+int binary_length(unsigned int num)
+{
+    int length = 0;
+
+    if (num == 0)
+        return 1;
+
+    while (num != 0)
+    {
+        length++;
+        num /= 2;
+    }
+
+    return length;
+}
+
+/**
+ * print_binary - Print the binary representation of a number
+ * @num: Number to print in binary
+ */
+void print_binary(unsigned int num)
+{
+    if (num / 2 != 0)
+        print_binary(num / 2);
+
+    write(1, (num % 2 == 0 ? "0" : "1"), 1);
 }
 
