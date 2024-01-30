@@ -1,3 +1,3 @@
 # Printf
 
-My ALX printf project
+ALX printf project
