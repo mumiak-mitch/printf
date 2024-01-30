@@ -8,13 +8,22 @@
  *
  * Return: Number of characters printed (excluding null byte)
  */
+ 
+void print_hexadecimal(unsigned long num, int base);
+int hex_length(unsigned long num);
+void print_special_string(char *str);
+int special_string_length(char *str);
+void print_rot13(char *str);
+int string_length(char *str);
+
 int _printf(const char *format, ...)
 {
     int specific_characters = 0;
     va_list my_list;
+    int num;
 
     if (format == NULL)
-        return -1;
+        return (-1);
 
     va_start(my_list, format);
 
@@ -48,18 +57,11 @@ int _printf(const char *format, ...)
                 write(1, str, strlen);
                 specific_characters += strlen;
             }
-            else if (*format == 'd' || *format == 'i')
+            else if (*format == 'u')
             {
-                int num = va_arg(my_list, int);
+                unsigned int num = va_arg(my_list, unsigned int);
                 char buffer[12];
                 int length = 0;
-
-                if (num < 0)
-                {
-                    write(1, "-", 1);
-                    specific_characters++;
-                    num = -num;
-                }
 
                 if (num == 0)
                 {
@@ -81,25 +83,101 @@ int _printf(const char *format, ...)
                     }
                 }
             }
-            else if (*format == 'u')
+            else if (*format == 'd' || *format == 'i')
             {
-         
+                if (num < 0)
+                {
+                    write(1, "-", 1);
+                    specific_characters++;
+                    num = -num;
+                }
             }
             else if (*format == 'x' || *format == 'X')
             {
-                
+               
+                unsigned int num = va_arg(my_list, unsigned int);
+                char buffer[12]; 
+                int length = 0;
+                char hex_chars[] = "0123456789abcdef";
+
+                if (num == 0)
+                {
+                    write(1, "0", 1);
+                    specific_characters++;
+                }
+                else
+                {
+                    while (num != 0)
+                    {
+                        buffer[length++] = hex_chars[num % 16];
+                        num /= 16;
+                    }
+
+                    while (length > 0)
+                    {
+                        write(1, &buffer[--length], 1);
+                        specific_characters++;
+                    }
+                }
             }
             else if (*format == 'b')
             {
+                
                 unsigned int num = va_arg(my_list, unsigned int);
                 print_binary(num);
                 specific_characters += binary_length(num);
             }
-            else if (*format == '%')
+            else if (*format == 'o')
             {
-                write(1, "%", 1);
-                specific_characters++;
+                
+                unsigned int num = va_arg(my_list, unsigned int);
+                char buffer[12]; 
+                int length = 0;
+
+                if (num == 0)
+                {
+                    write(1, "0", 1);
+                    specific_characters++;
+                }
+                else
+                {
+                    while (num != 0)
+                    {
+                        buffer[length++] = num % 8 + '0';
+                        num /= 8;
+                    }
+
+                    while (length > 0)
+                    {
+                        write(1, &buffer[--length], 1);
+                        specific_characters++;
+                    }
+                }
             }
+            else if (*format == 'p')
+            {
+                
+                void *ptr = va_arg(my_list, void *);
+                write(1, "0x", 2);
+                specific_characters += 2;
+                print_hexadecimal((unsigned long)ptr, 16);
+                specific_characters += hex_length((unsigned long)ptr);
+            }
+            else if (*format == 'S')
+            {
+                
+                char *str = va_arg(my_list, char*);
+                print_special_string(str);
+                specific_characters += special_string_length(str);
+            }
+            else if (*format == 'R')
+            {
+                
+                char *str = va_arg(my_list, char*);
+                print_rot13(str);
+                specific_characters += string_length(str);
+            }          
+
         }
         format++;
     }
@@ -108,38 +186,3 @@ int _printf(const char *format, ...)
 
     return specific_characters;
 }
-
-/**
- * binary_length - Get the length of the binary representation of a number
- * @num: Number to get the length of
- *
- * Return: Length of binary representation
- */
-int binary_length(unsigned int num)
-{
-    int length = 0;
-
-    if (num == 0)
-        return 1;
-
-    while (num != 0)
-    {
-        length++;
-        num /= 2;
-    }
-
-    return length;
-}
-
-/**
- * print_binary - Print the binary representation of a number
- * @num: Number to print in binary
- */
-void print_binary(unsigned int num)
-{
-    if (num / 2 != 0)
-        print_binary(num / 2);
-
-    write(1, (num % 2 == 0 ? "0" : "1"), 1);
-}
-
