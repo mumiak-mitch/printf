@@ -29,7 +29,6 @@ int _printf(const char *format, ...)
             format++;
             if (*format == '\0')
                 break;
-
             if (*format == 'c')
             {
                 char c = va_arg(my_list, int);
@@ -51,6 +50,14 @@ int _printf(const char *format, ...)
             {
                 write(1, "%", 1);
                 specific_characters++;
+            }
+            else if (*format == 'd' || *format == 'i')
+            {
+                int num = va_arg(my_list, int);
+                char buffer[12]; 
+                int len = sprintf(buffer, "%d", num);
+                write(1, buffer, len);
+                specific_characters += len;
             }
         }
         format++;
